@@ -1,0 +1,13 @@
+== Nagios Oracle Plugin ==
+
+This project provides a JDBC based plugin to monitor Oracle database using Nagios.
+
+=== Requirements: ===
+* Apache Maven version 3
+
+=== How it works: ===
+TODO:
+
+=== Licensing and Copyright: ===
+
+The project is licensed under the http://www.apache.org/licenses/LICENSE-2.0[Apache License, Version 2.0]
