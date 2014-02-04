@@ -31,8 +31,45 @@ usage: java -jar nagios-plugin-oracle.jar -C <arg> [-D] [-d] -H <arg> [-h]
 
 ----
 
-=== How it works: ===
-TODO:
+=== Check Tablespace Usage: ===
+
+This section provides example configuration for checking percent tablespace usage.
+
+==== Installation: ====
+
+Edit your commands.cfg and add the following
+
+ define command {
+    command_name    check_tablespace
+    command_line    $USER1$/nagios-plugin-oracle.jar -H $HOSTADDRESS$ -P $ARG1$ -I $ARG2$ -u $ARG3$ -p $ARG4$ -t $ARG5$ -W $ARG6$ -C $ARG7$
+ }
+
+(add -D to the command if you want to add perfdata to the output)
+Then you can reference it like the following.
+
+==== Usage: ====
+
+===== Check TEMP Tablespace Usage =====
+
+The option allows you to monitor the percent tablespace usage for the given tablespace name e.g. +TEMP+.
+
+ define service {
+    use                     generic-service
+    hostgroup_name          Oracle Servers
+    service_description     TEMP_TABLESPACE_USAGE
+    check_command           check_tablespace!1521!XE!admin!password!TEMP!10!20
+ }
+
+===== Check USERS Tablespace Usage =====
+
+The option allows you to monitor the percent tablespace usage for +USERS+ tablespace. The +WARNING+ threshold is set to 60% and +CRITICAL+ threshold is set to 80%
+
+ define service {
+    use                     generic-service
+    hostgroup_name          Oracle Servers
+    service_description     USERS_TABLESPACE_USAGE
+    check_command           check_tablespace!1521!XE!admin!password!USERS!60!80
+ }
 
 === Licensing and Copyright: ===
 
