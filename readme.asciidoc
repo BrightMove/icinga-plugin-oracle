@@ -1,9 +1,35 @@
 == Nagios Oracle Plugin ==
 
-This project provides a JDBC based plugin to monitor Oracle database using Nagios.
+This project provides a JDBC based plugin to monitor Oracle database using Nagios. The plugin currently supports monitoring of tablespace usage percentage and active session count for user.
 
 === Requirements: ===
 * Apache Maven version 3
+* JDK6 and higher
+* Oracle 11g
+
+=== Usage: ===
+The current plugin supports following options.
+
+[source,bash]
+----
+
+Aparna$ java -jar nagios-plugin-oracle.jar -h
+usage: java -jar nagios-plugin-oracle.jar -C <arg> [-D] [-d] -H <arg> [-h]
+       -I <arg> -P <arg> -p <arg> [-s <arg>] [-t <arg>] -u <arg> -W <arg>
+ -C <arg>                The critical threshold you want to set
+ -D                      Enable output of Nagios performance data
+ -d,--debug              Option to enable debugging [true|false]
+ -H,--host <arg>         The database hostname to connect to
+ -h,--help               Print help for this application
+ -I,--instance <arg>     The database instance name
+ -P,--port <arg>         The database listener port
+ -p,--password <arg>     The password for the user
+ -s,--sessions <arg>     The username for which session count to check
+ -t,--tablespace <arg>   The tablespace to check
+ -u,--user <arg>         The username you want to login as
+ -W <arg>                The warning threshold you want to set
+
+----
 
 === How it works: ===
 TODO:

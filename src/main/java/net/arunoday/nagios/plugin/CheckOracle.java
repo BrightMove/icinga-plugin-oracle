@@ -1,5 +1,7 @@
 package net.arunoday.nagios.plugin;
 
+import static net.arunoday.nagios.plugin.NagiosStatus.UNKNOWN;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -14,16 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Main class for Nagios checks.
+ * 
  * @author Aparna Chaudhary
  */
 public class CheckOracle {
 
 	private static final Logger logger = LoggerFactory.getLogger(CheckOracle.class);
-
-	private static final int OK_STATUS_CODE = 0;
-	private static final int WARNING_STATUS_CODE = 1;
-	private static final int CRITICAL_STATUS_CODE = 2;
-	private static final int UNKNOWN_STATUS_CODE = 3;
+	boolean debug = false;
 
 	public static void main(String args[]) {
 		CheckOracle checkOracle = new CheckOracle();
@@ -32,8 +32,9 @@ public class CheckOracle {
 
 	@SuppressWarnings("static-access")
 	private void parseOptions(String[] args) {
+		Options options = null;
 		try {
-			Options options = new Options();
+			options = new Options();
 			options.addOption("h", "help", false, "Print help for this application");
 			options.addOption(OptionBuilder.withDescription("Option to enable debugging [true|false]").withLongOpt("debug")
 					.withType(Boolean.class).hasArg().create('d'));
@@ -48,10 +49,13 @@ public class CheckOracle {
 					.withLongOpt("user").withType(String.class).hasArg().create("u"));
 			options.addOption(OptionBuilder.isRequired(true).withDescription("The password for the user")
 					.withLongOpt("password").withType(String.class).hasArg().create("p"));
-			options.addOption("W", true, "The warning threshold you want to set");
-			options.addOption("C", true, "The critical threshold you want to set");
+			options.addOption(OptionBuilder.isRequired(true).withDescription("The warning threshold you want to set")
+					.withType(String.class).hasArg().create("W"));
+			options.addOption(OptionBuilder.isRequired(true).withDescription("The critical threshold you want to set")
+					.withType(String.class).hasArg().create("C"));
 
 			options.addOption("t", "tablespace", true, "The tablespace to check");
+			options.addOption("s", "sessions", true, "The username for which session count to check");
 
 			BasicParser parser = new BasicParser();
 			CommandLine commandLine = parser.parse(options, args);
@@ -59,7 +63,6 @@ public class CheckOracle {
 			if (commandLine.hasOption('h')) {
 				printHelp(options);
 			}
-			boolean debug = false;
 			if (commandLine.hasOption('d')) {
 				debug = Boolean.valueOf(commandLine.getOptionValue('d'));
 			}
@@ -73,41 +76,58 @@ public class CheckOracle {
 			executeCheck(commandLine, debug, hostname, port, instanceName, username, password);
 
 		} catch (ParseException e) {
-			System.err.println("Error: Failed to parse options.");
-			System.err.println(e);
-			System.exit(UNKNOWN_STATUS_CODE);
+			printHelp(options);
+			System.exit(UNKNOWN.getCode());
 		}
 	}
 
+	/**
+	 * Executes the check based on provided options
+	 * 
+	 * @param commandLine
+	 * @param debug flag to enable debug logging
+	 * @param hostname oracle server host
+	 * @param port listener port
+	 * @param instanceName instance name
+	 * @param username DBA user name
+	 * @param password password
+	 */
 	private void executeCheck(CommandLine commandLine, boolean debug, String hostname, Integer port, String instanceName,
 			String username, String password) {
 		Connection connection = null;
 		try {
 
-			Object warning = commandLine.getOptionValue('W');
-			Object crtical = commandLine.getOptionValue('C');
+			String warning = commandLine.getOptionValue('W');
+			String crtical = commandLine.getOptionValue('C');
 
-			if (debug) {
-				logger.debug("Connection URL: " + String.format("jdbc:oracle:thin:@%s:%s:%s", hostname, port, instanceName));
-			}
 			connection = getConnection(hostname, port, instanceName, username, password);
 
 			if (commandLine.hasOption('t')) {
 				Object tablespace = commandLine.getOptionValue('t');
 				CheckTablespace checkTablespace = new CheckTablespace(debug);
 				checkTablespace.performCheck(connection, tablespace, warning, crtical);
+			} else if (commandLine.hasOption('s')) {
+				Object userToCheck = commandLine.getOptionValue('s');
+				CheckSessions checkSessions = new CheckSessions(debug);
+				checkSessions.performCheck(connection, userToCheck, warning, crtical);
+			} else {
+				System.err.println("Error: Invalid option");
+				System.exit(UNKNOWN.getCode());
 			}
 		} catch (Exception e) {
-			System.err.println("Error: Failed to execute check");
-			System.err.println(e);
-			System.exit(UNKNOWN_STATUS_CODE);
+			if (debug) {
+				logger.error("Failed to execute check", e);
+			}
+			System.err.println("Error: Failed to execute check" + e);
+			System.exit(UNKNOWN.getCode());
 		} finally {
 			try {
-				connection.close();
+				if (!connection.isClosed()) {
+					connection.close();
+				}
 			} catch (SQLException e) {
 				System.err.println("Error: Failed to close JDBC connection");
-				System.err.println(e);
-				System.exit(UNKNOWN_STATUS_CODE);
+				System.exit(UNKNOWN.getCode());
 			}
 		}
 	}
@@ -121,6 +141,17 @@ public class CheckOracle {
 		helpFormatter.printHelp(commandLineSyntax, options, true);
 	}
 
+	/**
+	 * Gets a SQL connection based on input parameters
+	 * 
+	 * @param hostname oracle server host
+	 * @param port listener port
+	 * @param instance instance name
+	 * @param username DBA user name
+	 * @param password password
+	 * @return SQL connection
+	 * @throws SQLException thrown when SQL connection cannot be established
+	 */
 	protected Connection getConnection(String hostname, Integer port, String instance, String username, String password)
 			throws SQLException {
 		try {
@@ -128,9 +159,12 @@ public class CheckOracle {
 		} catch (ClassNotFoundException e) {
 			System.err.println("Error: Failed to load JDBC driver.");
 			System.err.println(e);
-			System.exit(UNKNOWN_STATUS_CODE);
+			System.exit(UNKNOWN.getCode());
 		}
 
+		if (debug) {
+			logger.debug("Connection URL: " + String.format("jdbc:oracle:thin:@%s:%s:%s", hostname, port, instance));
+		}
 		String connUrl = String.format("jdbc:oracle:thin:@%s:%s:%s", hostname, port, instance);
 		Connection connection = DriverManager.getConnection(connUrl, username, password);
 		return connection;
