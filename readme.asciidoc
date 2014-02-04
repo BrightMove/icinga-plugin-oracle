@@ -71,6 +71,35 @@ The option allows you to monitor the percent tablespace usage for +USERS+ tables
     check_command           check_tablespace!1521!XE!admin!password!USERS!60!80
  }
 
+=== Check Active Session Count: ===
+
+This section provides example configuration for checking active session count for the given username.
+
+==== Installation: ====
+
+Edit your commands.cfg and add the following
+
+ define command {
+    command_name    check_sessions
+    command_line    $USER1$/nagios-plugin-oracle.jar -H $HOSTADDRESS$ -P $ARG1$ -I $ARG2$ -u $ARG3$ -p $ARG4$ -s $ARG5$ -W $ARG6$ -C $ARG7$
+ }
+
+(add -D to the command if you want to add perfdata to the output)
+Then you can reference it like the following.
+
+==== Usage: ====
+
+===== Check active session count =====
+
+The option allows you to monitor the active session count for the given username e.g. +HR+.
+
+ define service {
+    use                     generic-service
+    hostgroup_name          Oracle Servers
+    service_description     SESSION_COUNT
+    check_command           check_tablespace!1521!XE!admin!password!HR!5!10
+ }
+
 === Licensing and Copyright: ===
 
 The project is licensed under the http://www.apache.org/licenses/LICENSE-2.0[Apache License, Version 2.0]
