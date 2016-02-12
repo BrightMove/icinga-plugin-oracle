@@ -56,7 +56,7 @@ public class CheckTablespace extends AbstractCheck {
 				tbspname = rs.getString(1);
 				usedSpace = rs.getInt(2);
 				actualSpace = rs.getInt(3);
-				percent_used = (usedSpace * 100) / actualSpace;
+				percent_used = usedSpace / actualSpace;
 
 				if (debug) {
 					logger.debug(String.format("Name: %20s ", tbspname));
