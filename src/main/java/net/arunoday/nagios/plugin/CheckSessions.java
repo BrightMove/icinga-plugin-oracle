@@ -32,7 +32,7 @@ public class CheckSessions extends AbstractCheck {
 	 * @param warningThreshold warning threshold
 	 * @param crticalThreshold critical threshold
 	 */
-	public void performCheck(Connection connection, Object username, String warningThreshold, String crticalThreshold) {
+	public void performCheck(Connection connection, String username, String warningThreshold, String crticalThreshold) {
 		try {
 			String query = "SELECT COUNT(1) FROM v$session WHERE username ='" + username + "'";
 

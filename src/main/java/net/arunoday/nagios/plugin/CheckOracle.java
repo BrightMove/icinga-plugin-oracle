@@ -103,11 +103,11 @@ public class CheckOracle {
 			connection = getConnection(hostname, port, instanceName, username, password);
 
 			if (commandLine.hasOption('t')) {
-				Object tablespace = commandLine.getOptionValue('t');
+				String tablespace = commandLine.getOptionValue('t');
 				CheckTablespace checkTablespace = new CheckTablespace(debug);
 				checkTablespace.performCheck(connection, tablespace, warning, crtical);
 			} else if (commandLine.hasOption('s')) {
-				Object userToCheck = commandLine.getOptionValue('s');
+				String userToCheck = commandLine.getOptionValue('s');
 				CheckSessions checkSessions = new CheckSessions(debug);
 				checkSessions.performCheck(connection, userToCheck, warning, crtical);
 			} else {

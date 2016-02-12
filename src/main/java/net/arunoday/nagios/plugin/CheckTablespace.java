@@ -1,10 +1,11 @@
 package net.arunoday.nagios.plugin;
+
 import static net.arunoday.nagios.plugin.NagiosStatus.UNKNOWN;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,18 +32,19 @@ public class CheckTablespace extends AbstractCheck {
 	 * @param warningThreshold warning threshold
 	 * @param crticalThreshold critical threshold
 	 */
-	public void performCheck(Connection connection, Object tablespace, String warningThreshold, String crticalThreshold) {
+	public void performCheck(Connection connection, String tablespace, String warningThreshold, String crticalThreshold) {
 		try {
-			String query = "SELECT tablespace_name, round(bytes/1024/1024) AS USED_MB, round(maxbytes/1024/1024) AS ACTUAL_MB FROM dba_data_files WHERE TABLESPACE_NAME ='"
-					+ tablespace + "'";
+			String query = "SELECT tablespace_name, round(sum(bytes)/1024/1024) AS USED_MB, round(sum(maxbytes)/1024/1024) AS ACTUAL_MB "
+					+ "FROM dba_data_files " + "WHERE tablespace_name = ? " + "group by tablespace_name";
 
 			if (debug) {
 				logger.debug("Executing query " + query);
 			}
 
 			// execute query
-			Statement statement = connection.createStatement();
-			ResultSet rs = statement.executeQuery(query);
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setObject(1, tablespace);
+			ResultSet rs = statement.executeQuery();
 
 			String tbspname = "";
 			int warning = Integer.valueOf(warningThreshold);
@@ -50,7 +52,7 @@ public class CheckTablespace extends AbstractCheck {
 			int actualSpace = 0;
 			int usedSpace = 0;
 			int percent_used = 0;
-			while (rs.next()) {
+			if (rs != null && rs.next()) {
 				tbspname = rs.getString(1);
 				usedSpace = rs.getInt(2);
 				actualSpace = rs.getInt(3);
@@ -80,5 +82,4 @@ public class CheckTablespace extends AbstractCheck {
 		}
 
 	}
-
 }
