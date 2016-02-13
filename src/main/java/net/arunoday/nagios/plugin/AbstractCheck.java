@@ -32,4 +32,19 @@ public abstract class AbstractCheck {
 		}
 	}
 
+	protected void checkLevelMultiple(float percent_used, int warning, int crtical, String message) {
+		if (percent_used < warning) {
+			System.out.println(message + " : OK");
+			System.exit(OK.getCode());
+		}
+		if (percent_used >= warning && percent_used < crtical) {
+			System.out.println(message + " : WARNING");
+			System.exit(WARNING.getCode());
+		}
+		if (percent_used >= crtical) {
+			System.out.println(message + " : CRITICAL");
+			System.exit(CRITICAL.getCode());
+		}
+	}
+
 }

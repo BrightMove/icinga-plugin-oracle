@@ -98,7 +98,7 @@ public class CheckTablespaces extends AbstractCheck {
 			// String output = String.format("%s: used %10.2fMB of %10.2fMB|%s", tbspname, usedSpace, actualSpace, perfdata);
 
 			// verify level
-			checkLevel(percent_used, warning, crtical, output.toString());
+			checkLevelMultiple(percent_used, warning, crtical, output.toString());
 
 		} catch (SQLException e) {
 			System.err.println(e);
