@@ -69,8 +69,8 @@ public class CheckTablespaces extends AbstractCheck {
 			float freeSpace = 0.0F;
 			float percent_used = 0.0F;
 
-			StringBuilder output = new StringBuilder(); // /Attachments: 12%used(1290485MB/10486654MB) /Resumes:
-																									// 12%used(1290485MB/10486654MB) (<80%) : OK
+			StringBuilder output = new StringBuilder();
+			StringBuilder perfdata = new StringBuilder();
 
 			while (rs != null && rs.next()) {
 				tbspname = rs.getString("tablespace_name");
@@ -81,6 +81,7 @@ public class CheckTablespaces extends AbstractCheck {
 
 				output.append(String
 						.format("%s: %3.2f%%used(%3.2fMB/%3.2fMB) ", tbspname, percent_used, usedSpace, actualSpace));
+				perfdata.append(String.format("%s=%3.2f;%d;%d", tbspname, percent_used, warning, crtical));
 
 				if (debug) {
 					LOG.debug(String.format("Name:          %s ", tbspname));
@@ -94,11 +95,8 @@ public class CheckTablespaces extends AbstractCheck {
 			statement.close();
 			connection.close();
 
-			// String perfdata = String.format("%s_usage=%3.2f;%d;%d", tbspname, percent_used, warning, crtical);
-			// String output = String.format("%s: used %10.2fMB of %10.2fMB|%s", tbspname, usedSpace, actualSpace, perfdata);
-
 			// verify level
-			checkLevelMultiple(percent_used, warning, crtical, output.toString());
+			checkLevel(percent_used, warning, crtical, output.toString() + "|" + perfdata.toString());
 
 		} catch (SQLException e) {
 			System.err.println(e);
