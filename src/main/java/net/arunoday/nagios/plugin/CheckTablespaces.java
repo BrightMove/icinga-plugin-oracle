@@ -81,7 +81,7 @@ public class CheckTablespaces extends AbstractCheck {
 
 				output.append(String
 						.format("%s: %3.2f%%used(%3.2fMB/%3.2fMB) ", tbspname, percent_used, usedSpace, actualSpace));
-				perfdata.append(String.format("%s=%3.2f;%d;%d", tbspname, percent_used, warning, crtical));
+				perfdata.append(String.format("%s=%3.2f;%d;%d ", tbspname, percent_used, warning, crtical));
 
 				if (debug) {
 					LOG.debug(String.format("Name:          %s ", tbspname));
