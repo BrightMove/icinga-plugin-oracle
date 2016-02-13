@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +73,7 @@ public class CheckTablespaces extends AbstractCheck {
 
 			StringBuilder output = new StringBuilder();
 			StringBuilder perfdata = new StringBuilder();
+			List<Float> levels = new ArrayList<Float>();
 
 			while (rs != null && rs.next()) {
 				tbspname = rs.getString("tablespace_name");
@@ -79,6 +82,7 @@ public class CheckTablespaces extends AbstractCheck {
 				usedSpace = actualSpace - freeSpace;
 				percent_used = rs.getFloat("pct_used");
 
+				levels.add(percent_used);
 				output.append(String
 						.format("%s: %3.2f%%used(%3.2fMB/%3.2fMB) ", tbspname, percent_used, usedSpace, actualSpace));
 				perfdata.append(String.format("%s=%3.2f;%d;%d ", tbspname, percent_used, warning, crtical));
@@ -96,7 +100,7 @@ public class CheckTablespaces extends AbstractCheck {
 			connection.close();
 
 			// verify level
-			checkLevel(percent_used, warning, crtical, output.toString() + "|" + perfdata.toString());
+			checkLevel(levels, warning, crtical, output.toString(), perfdata.toString());
 
 		} catch (SQLException e) {
 			System.err.println(e);
@@ -104,4 +108,5 @@ public class CheckTablespaces extends AbstractCheck {
 		}
 
 	}
+
 }

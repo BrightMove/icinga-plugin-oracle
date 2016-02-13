@@ -4,6 +4,8 @@ import static net.arunoday.nagios.plugin.NagiosStatus.CRITICAL;
 import static net.arunoday.nagios.plugin.NagiosStatus.OK;
 import static net.arunoday.nagios.plugin.NagiosStatus.WARNING;
 
+import java.util.List;
+
 /**
  * @author Aparna Chaudhary
  */
@@ -32,19 +34,24 @@ public abstract class AbstractCheck {
 		}
 	}
 
-	protected void checkLevelMultiple(float percent_used, int warning, int crtical, String message) {
-		if (percent_used < warning) {
-			System.out.println(message + " : OK");
-			System.exit(OK.getCode());
-		}
-		if (percent_used >= warning && percent_used < crtical) {
-			System.out.println(message + " : WARNING");
-			System.exit(WARNING.getCode());
-		}
-		if (percent_used >= crtical) {
-			System.out.println(message + " : CRITICAL");
-			System.exit(CRITICAL.getCode());
-		}
-	}
+	protected void checkLevel(List<Float> levels, int warning, int critical, String output, String perfdata) {
 
+		StringBuilder violations = new StringBuilder();
+		NagiosStatus disposition = OK;
+
+		for (Float percent_used : levels) {
+			if (percent_used >= warning && percent_used < critical) {
+				violations.append(String.format("(%3.2f > %d) ", percent_used, warning));
+				disposition = WARNING.getCode() > disposition.getCode() ? WARNING : disposition;
+			}
+			if (percent_used >= critical) {
+				violations.append(String.format("(%3.2f > %d) ", percent_used, critical));
+				disposition = CRITICAL.getCode() > disposition.getCode() ? CRITICAL : disposition;
+			}
+		}
+
+		System.out.println(String.format("%s - %s %s | %s", disposition, output, violations.toString(), perfdata));
+		System.exit(disposition.getCode());
+
+	}
 }
