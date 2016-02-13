@@ -16,12 +16,12 @@ import org.slf4j.LoggerFactory;
  * @author Aparna Chaudhary
  * @author David Webb
  */
-public class CheckTablespace extends AbstractCheck {
+public class CheckTablespaces extends AbstractCheck {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CheckTablespace.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CheckTablespaces.class);
 	private boolean debug = false;
 
-	public CheckTablespace(boolean debug) {
+	public CheckTablespaces(boolean debug) {
 		this.debug = debug;
 	}
 
@@ -52,7 +52,6 @@ public class CheckTablespace extends AbstractCheck {
 			query.append("  GROUP BY tablespace_name \n");
 			query.append("  ) b \n");
 			query.append("WHERE a.tablespace_name(+)=b.tablespace_name \n");
-			query.append("AND b.tablespace_name = ? ");
 
 			if (debug) {
 				LOG.debug("Executing query " + query.toString());
@@ -60,7 +59,6 @@ public class CheckTablespace extends AbstractCheck {
 
 			// execute query
 			PreparedStatement statement = connection.prepareStatement(query.toString());
-			statement.setObject(1, tablespace);
 			ResultSet rs = statement.executeQuery();
 
 			String tbspname = "";
@@ -70,12 +68,19 @@ public class CheckTablespace extends AbstractCheck {
 			float usedSpace = 0.0F;
 			float freeSpace = 0.0F;
 			float percent_used = 0.0F;
+
+			StringBuilder output = new StringBuilder(); // /Attachments: 12%used(1290485MB/10486654MB) /Resumes:
+																									// 12%used(1290485MB/10486654MB) (<80%) : OK
+
 			while (rs != null && rs.next()) {
 				tbspname = rs.getString("tablespace_name");
 				actualSpace = rs.getFloat("tbs_size");
 				freeSpace = rs.getFloat("free_space");
 				usedSpace = actualSpace - freeSpace;
 				percent_used = rs.getFloat("pct_used");
+
+				output.append(String
+						.format("%s: %3.2f%%used(%3.2fMB/%3.2fMB) ", tbspname, percent_used, usedSpace, actualSpace));
 
 				if (debug) {
 					LOG.debug(String.format("Name:          %s ", tbspname));
@@ -89,11 +94,11 @@ public class CheckTablespace extends AbstractCheck {
 			statement.close();
 			connection.close();
 
-			String perfdata = String.format("%s_usage=%3.2f;%d;%d", tbspname, percent_used, warning, crtical);
-			String output = String.format("%s: used %10.2fMB of %10.2fMB|%s", tbspname, usedSpace, actualSpace, perfdata);
+			// String perfdata = String.format("%s_usage=%3.2f;%d;%d", tbspname, percent_used, warning, crtical);
+			// String output = String.format("%s: used %10.2fMB of %10.2fMB|%s", tbspname, usedSpace, actualSpace, perfdata);
 
 			// verify level
-			checkLevel(percent_used, warning, crtical, output);
+			checkLevel(percent_used, warning, crtical, output.toString());
 
 		} catch (SQLException e) {
 			System.err.println(e);

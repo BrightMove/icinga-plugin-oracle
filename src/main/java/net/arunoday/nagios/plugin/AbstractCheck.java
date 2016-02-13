@@ -12,21 +12,21 @@ public abstract class AbstractCheck {
 	/**
 	 * Checks if the input is exceeding the warning threshold or critical threshold.
 	 * 
-	 * @param data data to verify
+	 * @param percent_used data to verify
 	 * @param warning warning threshold
 	 * @param crtical critical threshold
 	 * @param message nagios message
 	 */
-	protected void checkLevel(int data, int warning, int crtical, String message) {
-		if (data < warning) {
+	protected void checkLevel(float percent_used, int warning, int crtical, String message) {
+		if (percent_used < warning) {
 			System.out.println("OK - " + message);
 			System.exit(OK.getCode());
 		}
-		if (data >= warning && data < crtical) {
+		if (percent_used >= warning && percent_used < crtical) {
 			System.out.println("WARNING - " + message);
 			System.exit(WARNING.getCode());
 		}
-		if (data >= crtical) {
+		if (percent_used >= crtical) {
 			System.out.println("CRITICAL - " + message);
 			System.exit(CRITICAL.getCode());
 		}

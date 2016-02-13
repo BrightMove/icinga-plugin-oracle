@@ -104,8 +104,13 @@ public class CheckOracle {
 
 			if (commandLine.hasOption('t')) {
 				String tablespace = commandLine.getOptionValue('t');
-				CheckTablespace checkTablespace = new CheckTablespace(debug);
-				checkTablespace.performCheck(connection, tablespace, warning, crtical);
+				if (tablespace.equalsIgnoreCase("ALL")) {
+					CheckTablespaces check = new CheckTablespaces(debug);
+					check.performCheck(connection, tablespace, warning, crtical);
+				} else {
+					CheckTablespace checkTablespace = new CheckTablespace(debug);
+					checkTablespace.performCheck(connection, tablespace, warning, crtical);
+				}
 			} else if (commandLine.hasOption('s')) {
 				String userToCheck = commandLine.getOptionValue('s');
 				CheckSessions checkSessions = new CheckSessions(debug);
