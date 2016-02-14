@@ -58,7 +58,7 @@ public class CheckSessions extends CheckAdapter {
 			connection.close();
 
 			String perfdata = username + "_sessions=" + usedSessions + ";" + warning + ";" + crtical;
-			String output = username + ": used sessions " + usedSessions + "|" + perfdata;
+			String output = username + ": active sessions " + usedSessions + "|" + perfdata;
 
 			checkLevel(usedSessions, warning, crtical, output);
 
