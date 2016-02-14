@@ -9,7 +9,7 @@
     </encoder>
   </appender>
 
-  <logger name="net.arunoday" level="DEBUG"/>
+  <logger name="org.icinga.oracle.plugin" level="DEBUG"/>
 
   <root level="INFO">
     <appender-ref ref="stdout"/>

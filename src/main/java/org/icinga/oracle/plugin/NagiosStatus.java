@@ -1,4 +1,4 @@
-package net.arunoday.nagios.plugin;
+package org.icinga.oracle.plugin;
 
 /**
  * Enumeration for Nagios status codes.

@@ -1,6 +1,6 @@
-package net.arunoday.nagios.plugin;
+package org.icinga.oracle.plugin;
 
-import static net.arunoday.nagios.plugin.NagiosStatus.UNKNOWN;
+import static org.icinga.oracle.plugin.NagiosStatus.UNKNOWN;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

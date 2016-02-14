@@ -1,8 +1,8 @@
-package net.arunoday.nagios.plugin;
+package org.icinga.oracle.plugin;
 
-import static net.arunoday.nagios.plugin.NagiosStatus.CRITICAL;
-import static net.arunoday.nagios.plugin.NagiosStatus.OK;
-import static net.arunoday.nagios.plugin.NagiosStatus.WARNING;
+import static org.icinga.oracle.plugin.NagiosStatus.CRITICAL;
+import static org.icinga.oracle.plugin.NagiosStatus.OK;
+import static org.icinga.oracle.plugin.NagiosStatus.WARNING;
 
 import java.util.List;
 
