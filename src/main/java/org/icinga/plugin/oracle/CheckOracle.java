@@ -112,7 +112,11 @@ public class CheckOracle {
 				}
 			} else if (commandLine.hasOption('s')) {
 				String userToCheck = commandLine.getOptionValue('s');
-				CheckSessions.performCheck(conn, userToCheck, warning, crtical, debug);
+				if (userToCheck.equalsIgnoreCase("ALL")) {
+					CheckDatabaseSessions.performCheck(conn, warning, crtical, debug);
+				} else {
+					CheckUserSessions.performCheck(conn, userToCheck, warning, crtical, debug);
+				}
 			} else {
 				System.err.println("Error: Invalid option");
 				System.exit(UNKNOWN.getCode());
@@ -142,7 +146,7 @@ public class CheckOracle {
 	 * Print help text
 	 */
 	public void printHelp(final Options options) {
-		final String commandLineSyntax = "java -jar nagios-plugin-oracle.jar";
+		final String commandLineSyntax = "check_oracle";
 		final HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.printHelp(commandLineSyntax, options, true);
 	}

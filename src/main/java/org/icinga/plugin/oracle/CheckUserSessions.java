@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * @author Aparna Chaudhary
  * @author David Webb
  */
-public class CheckSessions extends CheckAdapter {
+public class CheckUserSessions extends CheckAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(CheckTablespace.class);
 
@@ -55,7 +55,6 @@ public class CheckSessions extends CheckAdapter {
 
 			rs.close();
 			statement.close();
-			connection.close();
 
 			String perfdata = username + "_sessions=" + usedSessions + ";" + warning + ";" + crtical;
 			String output = username + ": active sessions " + usedSessions + "|" + perfdata;
