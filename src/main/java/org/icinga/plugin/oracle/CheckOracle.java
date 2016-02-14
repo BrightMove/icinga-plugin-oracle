@@ -53,9 +53,9 @@ public class CheckOracle {
 					.withLongOpt("user").withType(String.class).hasArg().create("u"));
 			options.addOption(OptionBuilder.isRequired(true).withDescription("The password for the user")
 					.withLongOpt("password").withType(String.class).hasArg().create("p"));
-			options.addOption(OptionBuilder.isRequired(true).withDescription("The warning threshold you want to set")
+			options.addOption(OptionBuilder.isRequired(false).withDescription("The warning threshold you want to set")
 					.withType(String.class).hasArg().create("W"));
-			options.addOption(OptionBuilder.isRequired(true).withDescription("The critical threshold you want to set")
+			options.addOption(OptionBuilder.isRequired(false).withDescription("The critical threshold you want to set")
 					.withType(String.class).hasArg().create("C"));
 
 			OptionGroup checkOptionGroup = new OptionGroup();
