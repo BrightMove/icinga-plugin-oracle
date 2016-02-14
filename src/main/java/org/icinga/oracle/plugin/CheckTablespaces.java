@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.icinga.oracle.plugin.bean.TablespaceMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +34,9 @@ public class CheckTablespaces extends AbstractCheck {
 	 * @param connection SQL connection
 	 * @param tablespace name of tablespace for which percent usage is checked
 	 * @param warningThreshold warning threshold
-	 * @param crticalThreshold critical threshold
+	 * @param criticalThreshold critical threshold
 	 */
-	public void performCheck(Connection connection, String tablespace, String warningThreshold, String crticalThreshold) {
+	public void performCheck(Connection connection, String tablespace, String warningThreshold, String criticalThreshold) {
 		try {
 			StringBuilder query = new StringBuilder();
 			query.append("SELECT b.tablespace_name, \n");
@@ -65,15 +66,13 @@ public class CheckTablespaces extends AbstractCheck {
 
 			String tbspname = "";
 			int warning = Integer.valueOf(warningThreshold);
-			int crtical = Integer.valueOf(crticalThreshold);
+			int crtical = Integer.valueOf(criticalThreshold);
 			float actualSpace = 0.0F;
 			float usedSpace = 0.0F;
 			float freeSpace = 0.0F;
 			float percent_used = 0.0F;
 
-			StringBuilder output = new StringBuilder();
-			StringBuilder perfdata = new StringBuilder();
-			List<Float> levels = new ArrayList<Float>();
+			List<TablespaceMetric> readings = new ArrayList<TablespaceMetric>();
 
 			while (rs != null && rs.next()) {
 				tbspname = rs.getString("tablespace_name");
@@ -82,10 +81,9 @@ public class CheckTablespaces extends AbstractCheck {
 				usedSpace = actualSpace - freeSpace;
 				percent_used = rs.getFloat("pct_used");
 
-				levels.add(percent_used);
-				output.append(String
-						.format("%s: %3.2f%%used(%3.2fMB/%3.2fMB) ", tbspname, percent_used, usedSpace, actualSpace));
-				perfdata.append(String.format("%s=%3.2f%%;%d;%d;0 ", tbspname, percent_used, warning, crtical));
+				readings.add(
+						new TablespaceMetric(tbspname, percent_used, 100.00F - percent_used, new Float(actualSpace).doubleValue(),
+								new Float(usedSpace).doubleValue(), new Float(freeSpace).doubleValue()));
 
 				if (debug) {
 					LOG.debug(String.format("Name:          %s ", tbspname));
@@ -100,7 +98,7 @@ public class CheckTablespaces extends AbstractCheck {
 			connection.close();
 
 			// verify level
-			checkLevel(levels, warning, crtical, output.toString(), perfdata.toString());
+			checkLevel(readings, warning, crtical);
 
 		} catch (SQLException e) {
 			System.err.println(e);
