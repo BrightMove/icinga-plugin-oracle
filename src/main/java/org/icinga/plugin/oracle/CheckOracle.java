@@ -1,6 +1,6 @@
-package org.icinga.oracle.plugin;
+package org.icinga.plugin.oracle;
 
-import static org.icinga.oracle.plugin.NagiosStatus.UNKNOWN;
+import static org.icinga.plugin.oracle.NagiosStatus.UNKNOWN;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,12 +1,12 @@
-package org.icinga.oracle.plugin;
+package org.icinga.plugin.oracle;
 
-import static org.icinga.oracle.plugin.NagiosStatus.CRITICAL;
-import static org.icinga.oracle.plugin.NagiosStatus.OK;
-import static org.icinga.oracle.plugin.NagiosStatus.WARNING;
+import static org.icinga.plugin.oracle.NagiosStatus.CRITICAL;
+import static org.icinga.plugin.oracle.NagiosStatus.OK;
+import static org.icinga.plugin.oracle.NagiosStatus.WARNING;
 
 import java.util.List;
 
-import org.icinga.oracle.plugin.bean.TablespaceMetric;
+import org.icinga.plugin.oracle.bean.TablespaceMetric;
 
 /**
  * @author Aparna Chaudhary

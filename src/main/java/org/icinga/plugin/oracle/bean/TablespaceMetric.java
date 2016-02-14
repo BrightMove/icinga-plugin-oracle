@@ -1,4 +1,4 @@
-package org.icinga.oracle.plugin.bean;
+package org.icinga.plugin.oracle.bean;
 
 public class TablespaceMetric {
 

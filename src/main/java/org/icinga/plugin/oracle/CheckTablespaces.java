@@ -1,6 +1,6 @@
-package org.icinga.oracle.plugin;
+package org.icinga.plugin.oracle;
 
-import static org.icinga.oracle.plugin.NagiosStatus.UNKNOWN;
+import static org.icinga.plugin.oracle.NagiosStatus.UNKNOWN;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.icinga.oracle.plugin.bean.TablespaceMetric;
+import org.icinga.plugin.oracle.bean.TablespaceMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
