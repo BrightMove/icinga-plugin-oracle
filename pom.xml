@@ -14,14 +14,6 @@
 		<log4back.version>1.0.6</log4back.version>
 	</properties>
 
-	<developers>
-		<developer>
-			<id>aparnac</id>
-			<name>Aparna Chaudhary</name>
-			<email>aparna.chaudhary@gmail.com</email>
-		</developer>
-	</developers>
-
 	<dependencies>
 		<!-- ==================== -->
 		<!-- OJDBC DEPENDENCIES -->
@@ -114,5 +106,6 @@
 				</executions>
 			</plugin>
 		</plugins>
+		<finalName>check_oracle.jar</finalName>
 	</build>
 </project>
