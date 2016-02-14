@@ -1,5 +1,7 @@
 package org.icinga.plugin.oracle;
 
+import static org.icinga.plugin.oracle.NagiosStatus.CRITICAL;
+import static org.icinga.plugin.oracle.NagiosStatus.OK;
 import static org.icinga.plugin.oracle.NagiosStatus.UNKNOWN;
 
 import java.sql.Connection;
@@ -10,6 +12,7 @@ import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
@@ -55,8 +58,17 @@ public class CheckOracle {
 			options.addOption(OptionBuilder.isRequired(true).withDescription("The critical threshold you want to set")
 					.withType(String.class).hasArg().create("C"));
 
-			options.addOption("t", "tablespace", true, "The tablespace to check");
-			options.addOption("s", "sessions", true, "The username for which session count to check");
+			OptionGroup checkOptionGroup = new OptionGroup();
+			checkOptionGroup.addOption(
+					OptionBuilder.isRequired(false).withDescription("The tablespace to check, pass ALL for all tablespaces")
+							.withLongOpt("tablespace").withType(String.class).hasArg().create("t"));
+			checkOptionGroup.addOption(OptionBuilder.isRequired(false)
+					.withDescription("The username for which session count to check, pass ALL to count all sessions")
+					.withLongOpt("sessions").withType(String.class).hasArg().create("s"));
+			checkOptionGroup.addOption(
+					OptionBuilder.isRequired(false).withDescription("Check that a connection can be made to the database.")
+							.withLongOpt("tns-listener-check").create("tns"));
+			options.addOptionGroup(checkOptionGroup);
 
 			BasicParser parser = new BasicParser();
 			CommandLine commandLine = parser.parse(options, args);
@@ -101,7 +113,20 @@ public class CheckOracle {
 			String warning = commandLine.getOptionValue('W');
 			String crtical = commandLine.getOptionValue('C');
 
-			conn = getConnection(hostname, port, instanceName, username, password);
+			if (commandLine.hasOption("tns")) {
+				try {
+					conn = getConnection(hostname, port, instanceName, username, password);
+
+					System.out.println(String.format("OK - Connected to %s (%s)", conn.getMetaData().getDatabaseProductName(),
+							conn.getMetaData().getDatabaseProductVersion()));
+					System.exit(OK.getCode());
+				} catch (SQLException e) {
+					System.out.println("Error: Unable to connect to database - " + e.getMessage());
+					System.exit(CRITICAL.getCode());
+				}
+			} else {
+				conn = getConnection(hostname, port, instanceName, username, password);
+			}
 
 			if (commandLine.hasOption('t')) {
 				String tablespace = commandLine.getOptionValue('t');
