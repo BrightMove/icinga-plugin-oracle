@@ -6,7 +6,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.icinga.plugin.oracle.bean.TablespaceMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,25 +19,25 @@ import org.slf4j.LoggerFactory;
  * @author Aparna Chaudhary
  * @author David Webb
  */
-public class CheckTablespace extends AbstractCheck {
+public class CheckTablespace extends CheckAdapter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CheckTablespace.class);
-	private boolean debug = false;
-
-	public CheckTablespace(boolean debug) {
-		this.debug = debug;
-	}
 
 	/**
-	 * Checks tablespace usage
+	 * Checks all tablespace usage
 	 *
 	 * @param connection SQL connection
-	 * @param tablespace name of tablespace for which percent usage is checked
 	 * @param warningThreshold warning threshold
-	 * @param crticalThreshold critical threshold
+	 * @param criticalThreshold critical threshold
 	 */
-	public void performCheck(Connection connection, String tablespace, String warningThreshold, String crticalThreshold) {
+	public static void performCheck(Connection connection, String tablespaceName, String warningThreshold,
+			String criticalThreshold, boolean debug) {
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
 		try {
+
 			StringBuilder query = new StringBuilder();
 			query.append("SELECT b.tablespace_name, \n");
 			query.append("  tbs_size, \n");
@@ -52,30 +55,37 @@ public class CheckTablespace extends AbstractCheck {
 			query.append("  GROUP BY tablespace_name \n");
 			query.append("  ) b \n");
 			query.append("WHERE a.tablespace_name(+)=b.tablespace_name \n");
-			query.append("AND b.tablespace_name = ? ");
+			query.append("AND upper(b.tablespace_name) = upper(?) \n");
 
 			if (debug) {
 				LOG.debug("Executing query " + query.toString());
 			}
 
 			// execute query
-			PreparedStatement statement = connection.prepareStatement(query.toString());
-			statement.setObject(1, tablespace);
-			ResultSet rs = statement.executeQuery();
+			pstmt = connection.prepareStatement(query.toString());
+			pstmt.setString(1, tablespaceName);
+			rs = pstmt.executeQuery();
 
 			String tbspname = "";
 			int warning = Integer.valueOf(warningThreshold);
-			int crtical = Integer.valueOf(crticalThreshold);
+			int crtical = Integer.valueOf(criticalThreshold);
 			float actualSpace = 0.0F;
 			float usedSpace = 0.0F;
 			float freeSpace = 0.0F;
 			float percent_used = 0.0F;
-			while (rs != null && rs.next()) {
+
+			List<TablespaceMetric> readings = new ArrayList<TablespaceMetric>();
+
+			if (rs != null && rs.next()) {
 				tbspname = rs.getString("tablespace_name");
 				actualSpace = rs.getFloat("tbs_size");
 				freeSpace = rs.getFloat("free_space");
 				usedSpace = actualSpace - freeSpace;
 				percent_used = rs.getFloat("pct_used");
+
+				readings.add(
+						new TablespaceMetric(tbspname, percent_used, 100.00F - percent_used, new Float(actualSpace).doubleValue(),
+								new Float(usedSpace).doubleValue(), new Float(freeSpace).doubleValue()));
 
 				if (debug) {
 					LOG.debug(String.format("Name:          %s ", tbspname));
@@ -83,21 +93,31 @@ public class CheckTablespace extends AbstractCheck {
 					LOG.debug(String.format("Space total:   %,10.2f MB", actualSpace));
 					LOG.debug(String.format("Space %% used: %3.2f %%\n", percent_used));
 				}
+			} else {
+				throw new IllegalArgumentException(String.format("Tablespace [%s] does not exist", tablespaceName));
 			}
 
-			rs.close();
-			statement.close();
-			connection.close();
-
-			String perfdata = String.format("%s_usage=%3.2f;%d;%d", tbspname, percent_used, warning, crtical);
-			String output = String.format("%s: used %10.2fMB of %10.2fMB|%s", tbspname, usedSpace, actualSpace, perfdata);
-
 			// verify level
-			checkLevel(percent_used, warning, crtical, output);
+			checkLevel(readings, warning, crtical);
 
 		} catch (SQLException e) {
 			System.err.println(e);
 			System.exit(UNKNOWN.getCode());
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException muted) {
+				}
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException muted) {
+				}
+
+			}
+
 		}
 
 	}

@@ -14,30 +14,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Check to provide percent tablespace size usage.
+ * Check all tablespaces
  *
- * @author Aparna Chaudhary
  * @author David Webb
  */
-public class CheckTablespaces extends AbstractCheck {
+public class CheckTablespaces extends CheckAdapter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CheckTablespaces.class);
-	private boolean debug = false;
-
-	public CheckTablespaces(boolean debug) {
-		this.debug = debug;
-	}
 
 	/**
-	 * Checks tablespace usage
+	 * Checks all tablespace usage
 	 *
 	 * @param connection SQL connection
-	 * @param tablespace name of tablespace for which percent usage is checked
 	 * @param warningThreshold warning threshold
 	 * @param criticalThreshold critical threshold
 	 */
-	public void performCheck(Connection connection, String tablespace, String warningThreshold, String criticalThreshold) {
+	public static void performCheck(Connection connection, String warningThreshold, String criticalThreshold,
+			boolean debug) {
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
 		try {
+
 			StringBuilder query = new StringBuilder();
 			query.append("SELECT b.tablespace_name, \n");
 			query.append("  tbs_size, \n");
@@ -61,8 +60,8 @@ public class CheckTablespaces extends AbstractCheck {
 			}
 
 			// execute query
-			PreparedStatement statement = connection.prepareStatement(query.toString());
-			ResultSet rs = statement.executeQuery();
+			pstmt = connection.prepareStatement(query.toString());
+			rs = pstmt.executeQuery();
 
 			String tbspname = "";
 			int warning = Integer.valueOf(warningThreshold);
@@ -93,16 +92,27 @@ public class CheckTablespaces extends AbstractCheck {
 				}
 			}
 
-			rs.close();
-			statement.close();
-			connection.close();
-
 			// verify level
 			checkLevel(readings, warning, crtical);
 
 		} catch (SQLException e) {
 			System.err.println(e);
 			System.exit(UNKNOWN.getCode());
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException muted) {
+				}
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException muted) {
+				}
+
+			}
+
 		}
 
 	}

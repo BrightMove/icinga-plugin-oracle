@@ -42,8 +42,8 @@ public class CheckOracle {
 			options.addOption("D", false, "Enable output of Nagios performance data");
 			options.addOption(OptionBuilder.isRequired(true).withDescription("The database hostname to connect to")
 					.withLongOpt("host").withType(String.class).hasArg().create('H'));
-			options.addOption(OptionBuilder.isRequired(true).withDescription("The database listener port")
-					.withLongOpt("port").withType(Number.class).hasArg().create("P"));
+			options.addOption(OptionBuilder.isRequired(true).withDescription("The database listener port").withLongOpt("port")
+					.withType(Number.class).hasArg().create("P"));
 			options.addOption(OptionBuilder.isRequired(true).withDescription("The database instance name")
 					.withLongOpt("instance").withType(String.class).hasArg().create("I"));
 			options.addOption(OptionBuilder.isRequired(true).withDescription("The username you want to login as")
@@ -95,31 +95,31 @@ public class CheckOracle {
 	 */
 	private void executeCheck(CommandLine commandLine, boolean debug, String hostname, Integer port, String instanceName,
 			String username, String password) {
-		Connection connection = null;
+		Connection conn = null;
 		try {
 
 			String warning = commandLine.getOptionValue('W');
 			String crtical = commandLine.getOptionValue('C');
 
-			connection = getConnection(hostname, port, instanceName, username, password);
+			conn = getConnection(hostname, port, instanceName, username, password);
 
 			if (commandLine.hasOption('t')) {
 				String tablespace = commandLine.getOptionValue('t');
 				if (tablespace.equalsIgnoreCase("ALL")) {
-					CheckTablespaces check = new CheckTablespaces(debug);
-					check.performCheck(connection, tablespace, warning, crtical);
+					CheckTablespaces.performCheck(conn, warning, crtical, debug);
 				} else {
-					CheckTablespace checkTablespace = new CheckTablespace(debug);
-					checkTablespace.performCheck(connection, tablespace, warning, crtical);
+					CheckTablespace.performCheck(conn, tablespace, warning, crtical, debug);
 				}
 			} else if (commandLine.hasOption('s')) {
 				String userToCheck = commandLine.getOptionValue('s');
-				CheckSessions checkSessions = new CheckSessions(debug);
-				checkSessions.performCheck(connection, userToCheck, warning, crtical);
+				CheckSessions.performCheck(conn, userToCheck, warning, crtical, debug);
 			} else {
 				System.err.println("Error: Invalid option");
 				System.exit(UNKNOWN.getCode());
 			}
+		} catch (IllegalArgumentException e) {
+			System.out.println(String.format("UNKNOWN - %s", e.getMessage()));
+			System.exit(UNKNOWN.getCode());
 		} catch (Exception e) {
 			if (debug) {
 				logger.error("Failed to execute check", e);
@@ -128,8 +128,8 @@ public class CheckOracle {
 			System.exit(UNKNOWN.getCode());
 		} finally {
 			try {
-				if (!connection.isClosed()) {
-					connection.close();
+				if (conn != null && !conn.isClosed()) {
+					conn.close();
 				}
 			} catch (SQLException e) {
 				System.err.println("Error: Failed to close JDBC connection");

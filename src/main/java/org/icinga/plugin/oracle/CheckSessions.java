@@ -14,15 +14,11 @@ import org.slf4j.LoggerFactory;
  * Check to provide count of active session for the given username.
  * 
  * @author Aparna Chaudhary
+ * @author David Webb
  */
-public class CheckSessions extends AbstractCheck {
+public class CheckSessions extends CheckAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(CheckTablespace.class);
-	private boolean debug = false;
-
-	public CheckSessions(boolean debug) {
-		this.debug = debug;
-	}
 
 	/**
 	 * Checks active session count for the given username.
@@ -31,8 +27,10 @@ public class CheckSessions extends AbstractCheck {
 	 * @param username user for which active session count is checked
 	 * @param warningThreshold warning threshold
 	 * @param crticalThreshold critical threshold
+	 * @param debug
 	 */
-	public void performCheck(Connection connection, String username, String warningThreshold, String crticalThreshold) {
+	public static void performCheck(Connection connection, String username, String warningThreshold,
+			String crticalThreshold, boolean debug) {
 		try {
 			String query = "SELECT COUNT(1) FROM v$session WHERE username ='" + username + "'";
 

@@ -9,9 +9,13 @@ import java.util.List;
 import org.icinga.plugin.oracle.bean.TablespaceMetric;
 
 /**
+ * Helpers to finalize a check by evaluating the readings against the thresholds, then generating output, perfdata and
+ * exit codes.
+ * 
  * @author Aparna Chaudhary
+ * @author David Webb
  */
-public abstract class AbstractCheck {
+public class CheckAdapter {
 
 	/**
 	 * Checks if the input is exceeding the warning threshold or critical threshold.
@@ -21,7 +25,7 @@ public abstract class AbstractCheck {
 	 * @param crtical critical threshold
 	 * @param message nagios message
 	 */
-	protected void checkLevel(float percent_used, int warning, int crtical, String message) {
+	protected static void checkLevel(float percent_used, int warning, int crtical, String message) {
 		if (percent_used < warning) {
 			System.out.println("OK - " + message);
 			System.exit(OK.getCode());
@@ -36,7 +40,7 @@ public abstract class AbstractCheck {
 		}
 	}
 
-	protected void checkLevel(List<TablespaceMetric> readings, int warning, int critical) {
+	protected static void checkLevel(List<TablespaceMetric> readings, int warning, int critical) {
 
 		StringBuilder violations = new StringBuilder();
 		NagiosStatus disposition = OK;
@@ -61,7 +65,7 @@ public abstract class AbstractCheck {
 
 	}
 
-	private Object generatePerfData(List<TablespaceMetric> readings, int warning, int critical) {
+	private static Object generatePerfData(List<TablespaceMetric> readings, int warning, int critical) {
 
 		StringBuilder perfdata = new StringBuilder();
 
