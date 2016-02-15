@@ -2,7 +2,7 @@
 
 A Java/JDBC plugin for monitoring Oracle Databases using Icinga.  
 
-Currently supported operation:
+==== Currently supported operations ====
 
 * Monitor the general connectivity to the database, ensuring the TNS Listener is available
 * Monitor usage on all tablespaces with universal warning and critical % thresholds
@@ -69,4 +69,4 @@ The project is licensed under the http://www.apache.org/licenses/LICENSE-2.0[Apa
 
 === Acknowledgement ===
 
-This project was inspired and built upon the original work here: https://github.com/aparnachaudhary/nagios-plugin-oracle[aparnachaudhary/nagios-oracle-plugin]
+This project was inspired by and built upon the original work here: https://github.com/aparnachaudhary/nagios-plugin-oracle[aparnachaudhary/nagios-oracle-plugin]
