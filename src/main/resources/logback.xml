@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<timestamp key="byDay" datePattern="yyyyMMdd'T'HHmmss" />
+	<timestamp key="byDay" datePattern="yyyy-MM-dd" />
 
 	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -11,7 +11,7 @@
 	</appender>
 
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-		<file>/var/log/icinga2/check_oracle-${byDay}.out</file>
+		<file>/var/log/icinga2/check-oracle-${byDay}.out</file>
 		<append>true</append>
 		<encoder>
 			<pattern>
