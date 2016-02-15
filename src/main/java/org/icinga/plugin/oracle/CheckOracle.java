@@ -143,7 +143,7 @@ public class CheckOracle {
 					CheckUserSessions.performCheck(conn, userToCheck, warning, crtical, debug);
 				}
 			} else {
-				System.err.println("Error: Invalid option");
+				System.out.println("Error: Invalid option");
 				System.exit(UNKNOWN.getCode());
 			}
 		} catch (IllegalArgumentException e) {
@@ -153,7 +153,7 @@ public class CheckOracle {
 			if (debug) {
 				logger.error("Failed to execute check", e);
 			}
-			System.err.println("Error: Failed to execute check" + e);
+			System.out.println("Error: Failed to execute check" + e);
 			System.exit(UNKNOWN.getCode());
 		} finally {
 			try {
@@ -161,7 +161,7 @@ public class CheckOracle {
 					conn.close();
 				}
 			} catch (SQLException e) {
-				System.err.println("Error: Failed to close JDBC connection");
+				System.out.println("Error: Failed to close JDBC connection");
 				System.exit(UNKNOWN.getCode());
 			}
 		}
@@ -192,8 +192,8 @@ public class CheckOracle {
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 		} catch (ClassNotFoundException e) {
-			System.err.println("Error: Failed to load JDBC driver.");
-			System.err.println(e);
+			System.out.println("Error: Failed to load JDBC driver.");
+			System.out.println(e);
 			System.exit(UNKNOWN.getCode());
 		}
 
