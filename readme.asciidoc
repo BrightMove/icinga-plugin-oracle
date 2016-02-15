@@ -1,6 +1,13 @@
-== Nagios Oracle Plugin ==
+== Icinga Oracle Plugin ==
 
-This project provides a JDBC based plugin to monitor Oracle database using Nagios. The plugin currently supports monitoring of tablespace usage percentage and active session count for user.
+A Java/JDBC plugin for monitoring Oracle Databases using Icinga.  
+
+Currently supported operation:
+* Monitor the general connectivity to the database, ensuring the TNS Listener is available
+* Monitor usage on all tablespaces with universal warning and critical % thresholds
+* Monitor usage on a single tablespace with specific warning and critical % thresholds
+* Monitor the total count of all active sessions in the database
+* Monitor the total count of active session for a single user
 
 === Requirements: ===
 * Apache Maven version 3
@@ -13,93 +20,52 @@ The current plugin supports following options.
 [source,bash]
 ----
 
-Aparna$ java -jar nagios-plugin-oracle.jar -h
-usage: java -jar nagios-plugin-oracle.jar -C <arg> [-D] [-d] -H <arg> [-h]
-       -I <arg> -P <arg> -p <arg> [-s <arg>] [-t <arg>] -u <arg> -W <arg>
- -C <arg>                The critical threshold you want to set
- -D                      Enable output of Nagios performance data
- -d,--debug              Option to enable debugging [true|false]
- -H,--host <arg>         The database hostname to connect to
- -h,--help               Print help for this application
- -I,--instance <arg>     The database instance name
- -P,--port <arg>         The database listener port
- -p,--password <arg>     The password for the user
- -s,--sessions <arg>     The username for which session count to check
- -t,--tablespace <arg>   The tablespace to check
- -u,--user <arg>         The username you want to login as
- -W <arg>                The warning threshold you want to set
+usage: check_oracle [-C <arg>] [-D] [-d] -H <arg> [-h] -I <arg> -P <arg>
+       -p <arg> [-s <arg> | -t <arg> | -tns]   -u <arg> [-W <arg>]
+ -C <arg>                    The critical threshold you want to set
+ -D                          Enable output of Nagios performance data
+ -d,--debug                  Option to enable debugging [true|false]
+ -H,--host <arg>             The database hostname to connect to
+ -h,--help                   Print help for this application
+ -I,--instance <arg>         The database instance name
+ -P,--port <arg>             The database listener port
+ -p,--password <arg>         The password for the user
+ -s,--sessions <arg>         The username for which session count to
+                             check, pass ALL to count all sessions
+ -t,--tablespace <arg>       The tablespace to check, pass ALL for all
+                             tablespaces
+ -tns,--tns-listener-check   Check that a connection can be made to the
+                             database.
+ -u,--user <arg>             The username you want to login as
+ -W <arg>                    The warning threshold you want to set
 
 ----
 
-=== Check Tablespace Usage: ===
+=== Installation ===
 
-This section provides example configuration for checking percent tablespace usage.
+Clone the project and build it using:
 
-==== Installation: ====
+  mvn clean package
+  
+Copy target/check_oracle.jar and ./check_oracle to your icinga plugins directory.
 
-Edit your commands.cfg and add the following
+See the examples below on defining CheckCommand, Service and Host objects for each type of check.
 
- define command {
-    command_name    check_tablespace
-    command_line    $USER1$/nagios-plugin-oracle.jar -H $HOSTADDRESS$ -P $ARG1$ -I $ARG2$ -u $ARG3$ -p $ARG4$ -t $ARG5$ -W $ARG6$ -C $ARG7$
- }
+=== Check TNS Listener Usage: ===
 
-(add -D to the command if you want to add perfdata to the output)
-Then you can reference it like the following.
+=== Database Session Usage: ===
 
-==== Usage: ====
+=== User Sessions Usage: ===
 
-===== Check TEMP Tablespace Usage =====
+=== All Tablespaces Usage: ===
 
-The option allows you to monitor the percent tablespace usage for the given tablespace name e.g. +TEMP+.
+=== Single Tablespace Usage: ===
 
- define service {
-    use                     generic-service
-    hostgroup_name          Oracle Servers
-    service_description     TEMP_TABLESPACE_USAGE
-    check_command           check_tablespace!1521!XE!admin!password!TEMP!10!20
- }
-
-===== Check USERS Tablespace Usage =====
-
-The option allows you to monitor the percent tablespace usage for +USERS+ tablespace. The +WARNING+ threshold is set to 60% and +CRITICAL+ threshold is set to 80%
-
- define service {
-    use                     generic-service
-    hostgroup_name          Oracle Servers
-    service_description     USERS_TABLESPACE_USAGE
-    check_command           check_tablespace!1521!XE!admin!password!USERS!60!80
- }
-
-=== Check Active Session Count: ===
-
-This section provides example configuration for checking active session count for the given username.
-
-==== Installation: ====
-
-Edit your commands.cfg and add the following
-
- define command {
-    command_name    check_sessions
-    command_line    $USER1$/nagios-plugin-oracle.jar -H $HOSTADDRESS$ -P $ARG1$ -I $ARG2$ -u $ARG3$ -p $ARG4$ -s $ARG5$ -W $ARG6$ -C $ARG7$
- }
-
-(add -D to the command if you want to add perfdata to the output)
-Then you can reference it like the following.
-
-==== Usage: ====
-
-===== Check active session count =====
-
-The option allows you to monitor the active session count for the given username e.g. +HR+.
-
- define service {
-    use                     generic-service
-    hostgroup_name          Oracle Servers
-    service_description     SESSION_COUNT
-    check_command           check_tablespace!1521!XE!admin!password!HR!5!10
- }
 
 === Licensing and Copyright: ===
 
 The project is licensed under the http://www.apache.org/licenses/LICENSE-2.0[Apache License, Version 2.0]
+
+=== Acknowledgement ===
+
+This project was inspired and built upon the original work here: https://github.com/aparnachaudhary/nagios-plugin-oracle[aparnachaudhary/nagios-oracle-plugin]
