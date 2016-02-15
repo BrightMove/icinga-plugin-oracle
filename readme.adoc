@@ -3,7 +3,6 @@
 A Java/JDBC plugin for monitoring Oracle Databases using Icinga.  
 
 ==== Currently supported operations ====
-
 * Monitor the general connectivity to the database, ensuring the TNS Listener is available
 * Monitor usage on all tablespaces with universal warning and critical % thresholds
 * Monitor usage on a single tablespace with specific warning and critical % thresholds
@@ -53,6 +52,10 @@ Copy ./target/check_oracle.jar and ./check_oracle to your icinga plugins directo
 See the examples below on defining CheckCommand, Service and Host objects for each type of check.
 
 === Check TNS Listener Usage ===
+
+==== Create a CheckCommand ====
+
+
 
 === Database Session Usage ===
 
