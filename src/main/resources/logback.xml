@@ -22,7 +22,7 @@
 
 	<logger name="org.icinga.oracle.plugin" level="DEBUG" />
 
-	<root level="INFO">
+	<root level="DEBUG">
 		<appender-ref ref="FILE" />
 		<appender-ref ref="stdout" />
 	</root>
