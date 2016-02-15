@@ -11,7 +11,7 @@
 	</appender>
 
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-		<file>check_oracle-${byDay}.out</file>
+		<file>/var/log/icinga2/check_oracle-${byDay}.out</file>
 		<append>true</append>
 		<encoder>
 			<pattern>
