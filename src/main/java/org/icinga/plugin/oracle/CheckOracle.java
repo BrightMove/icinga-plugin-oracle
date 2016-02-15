@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class CheckOracle {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CheckOracle.class);
-	boolean debug = false;
+	private boolean debug = false;
 
 	public static void main(String args[]) {
 		CheckOracle checkOracle = new CheckOracle();
@@ -77,7 +77,7 @@ public class CheckOracle {
 				printHelp(options);
 			}
 			if (commandLine.hasOption('d')) {
-				debug = Boolean.valueOf(commandLine.getOptionValue('d'));
+				debug = true;
 			}
 
 			String hostname = commandLine.getOptionValue('H');
@@ -86,7 +86,7 @@ public class CheckOracle {
 			String username = commandLine.getOptionValue('u');
 			String password = commandLine.getOptionValue('p');
 
-			executeCheck(commandLine, debug, hostname, port, instanceName, username, password);
+			executeCheck(commandLine, hostname, port, instanceName, username, password);
 
 		} catch (ParseException e) {
 			LOG.error("ParseException", e);
@@ -106,7 +106,7 @@ public class CheckOracle {
 	 * @param username DBA user name
 	 * @param password password
 	 */
-	private void executeCheck(CommandLine commandLine, boolean debug, String hostname, Integer port, String instanceName,
+	private void executeCheck(CommandLine commandLine, String hostname, Integer port, String instanceName,
 			String username, String password) {
 		Connection conn = null;
 		try {
