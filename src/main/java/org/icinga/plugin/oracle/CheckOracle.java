@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CheckOracle {
 
-	private static final Logger logger = LoggerFactory.getLogger(CheckOracle.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CheckOracle.class);
 	boolean debug = false;
 
 	public static void main(String args[]) {
@@ -89,6 +89,7 @@ public class CheckOracle {
 			executeCheck(commandLine, debug, hostname, port, instanceName, username, password);
 
 		} catch (ParseException e) {
+			LOG.error("ParseException", e);
 			printHelp(options);
 			System.exit(UNKNOWN.getCode());
 		}
@@ -121,6 +122,7 @@ public class CheckOracle {
 							conn.getMetaData().getDatabaseProductVersion()));
 					System.exit(OK.getCode());
 				} catch (SQLException e) {
+					LOG.error("TNS Check SQLException", e);
 					System.out.println("Error: Unable to connect to database - " + e.getMessage());
 					System.exit(CRITICAL.getCode());
 				}
@@ -143,16 +145,16 @@ public class CheckOracle {
 					CheckUserSessions.performCheck(conn, userToCheck, warning, crtical, debug);
 				}
 			} else {
+				LOG.error("Error: Invalid option");
 				System.out.println("Error: Invalid option");
 				System.exit(UNKNOWN.getCode());
 			}
 		} catch (IllegalArgumentException e) {
+			LOG.error(String.format("UNKNOWN - %s", e.getMessage()));
 			System.out.println(String.format("UNKNOWN - %s", e.getMessage()));
 			System.exit(UNKNOWN.getCode());
 		} catch (Exception e) {
-			if (debug) {
-				logger.error("Failed to execute check", e);
-			}
+			LOG.error("Failed to execute check", e);
 			System.out.println("Error: Failed to execute check" + e);
 			System.exit(UNKNOWN.getCode());
 		} finally {
@@ -161,6 +163,7 @@ public class CheckOracle {
 					conn.close();
 				}
 			} catch (SQLException e) {
+				LOG.error("SQLException closing connection", e);
 				System.out.println("Error: Failed to close JDBC connection");
 				System.exit(UNKNOWN.getCode());
 			}
@@ -198,7 +201,7 @@ public class CheckOracle {
 		}
 
 		if (debug) {
-			logger.debug("Connection URL: " + String.format("jdbc:oracle:thin:@%s:%s:%s", hostname, port, instance));
+			LOG.debug("Connection URL: " + String.format("jdbc:oracle:thin:@%s:%s:%s", hostname, port, instance));
 		}
 		String connUrl = String.format("jdbc:oracle:thin:@%s:%s:%s", hostname, port, instance);
 		Connection connection = DriverManager.getConnection(connUrl, username, password);
