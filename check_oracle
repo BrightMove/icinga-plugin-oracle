@@ -20,3 +20,4 @@ fi
 
 DIR=`dirname $0`
 $JAVA_CMD -jar $DIR/check_oracle.jar "$@"
+exit 0

@@ -89,7 +89,6 @@ public class CheckOracle {
 			executeCheck(commandLine, hostname, port, instanceName, username, password);
 
 		} catch (ParseException e) {
-			LOG.error("ParseException", e);
 			printHelp(options);
 			System.exit(UNKNOWN.getCode());
 		}
@@ -159,7 +158,7 @@ public class CheckOracle {
 			System.exit(UNKNOWN.getCode());
 		} finally {
 			try {
-				if (conn != null && !conn.isClosed()) {
+				if (conn != null) {
 					conn.close();
 				}
 			} catch (SQLException e) {
@@ -192,6 +191,7 @@ public class CheckOracle {
 	 */
 	protected Connection getConnection(String hostname, Integer port, String instance, String username, String password)
 			throws SQLException {
+
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 		} catch (ClassNotFoundException e) {
@@ -203,8 +203,11 @@ public class CheckOracle {
 		if (debug) {
 			LOG.debug("Connection URL: " + String.format("jdbc:oracle:thin:@%s:%s:%s", hostname, port, instance));
 		}
+
 		String connUrl = String.format("jdbc:oracle:thin:@%s:%s:%s", hostname, port, instance);
+		DriverManager.setLoginTimeout(300);
 		Connection connection = DriverManager.getConnection(connUrl, username, password);
+
 		return connection;
 	}
 
